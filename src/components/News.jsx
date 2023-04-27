@@ -16,13 +16,14 @@ export class News extends Component {
     category: PropTypes.string,
   };
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       articles: [],
       page: 1,
       loading: false,
     };
+    document.title="NewsApp - "+this.props.category;
   }
 
   updateNews = async () => {

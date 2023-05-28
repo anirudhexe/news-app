@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import PropTypes from "prop-types";
+import InfiniteScroll from "react-infinite-scroll-component";
+
 
 export class News extends Component {
   static defaultProps = {
@@ -22,8 +24,14 @@ export class News extends Component {
       articles: [],
       page: 1,
       loading: false,
+      totalResults: 0
     };
     document.title="NewsApp - "+this.props.category;
+  }
+
+  fetchMoreData=async()=>{
+    this.setState({page:this.state.page+1});
+    this.updateNews();
   }
 
   updateNews = async () => {
@@ -32,27 +40,10 @@ export class News extends Component {
     let data = await fetch(url);
     let parsedata = await data.json();
     this.setState({
-      articles: parsedata.articles,
+      articles: this.state.articles.concat(parsedata.articles),
       totalResults: parsedata.totalResults,
       loading: false,
     });
-  };
-
-  handlePrev = async () => {
-    this.setState({ page: this.state.page - 1 });
-    this.updateNews();
-  };
-
-  handleNext = async () => {
-    if (
-      this.state.page + 1 >
-      Math.ceil(this.state.totalResults / this.props.pageSize)
-    ) {
-      document.getElementById("btn-nxt").disabled = true;
-    } else {
-      this.setState({ page: this.state.page + 1 });
-      this.updateNews();
-    }
   };
 
   async componentDidMount() {
@@ -62,7 +53,6 @@ export class News extends Component {
   render() {
     return (
       <div className="container my-4">
-        {this.state.loading && <Spinner />}
         <h2
           className="text-center"
           style={{ color: "white", margin: "30px 0" }}
@@ -71,11 +61,18 @@ export class News extends Component {
             this.props.category.slice(1)}{" "}
           - Top headlines today
         </h2>
-        <div className="row">
-          {!this.state.loading &&
-            this.state.articles.map((ele) => {
+        
+        <InfiniteScroll
+          dataLength={this.state.articles.length}
+          next={this.fetchMoreData}
+          hasMore={true}
+          loader={this.state.loading && <Spinner/>}
+          style={{overflow:"hidden"}}
+        >
+          <div className="row">
+          {this.state.articles.map((ele,index) => {
               return (
-                <div className="col-md-4" key={ele.url}>
+                <div className="col-md-4" key={index}>
                   <NewsItem
                     title={ele.title ? ele.title : ""}
                     description={ele.description ? ele.description : ""}
@@ -88,29 +85,8 @@ export class News extends Component {
                 </div>
               );
             })}
-        </div>
-        <div class="d-flex justify-content-between">
-          <button
-            className="btn"
-            onClick={this.handlePrev}
-            disabled={this.state.page <= 1}
-            style={{ backgroundColor: "#e3f2fd" }}
-            href="#"
-            role="button"
-          >
-            &larr; Prev
-          </button>
-          <button
-            className="btn"
-            id="btn-nxt"
-            onClick={this.handleNext}
-            style={{ backgroundColor: "#e3f2fd" }}
-            href="#"
-            role="button"
-          >
-            Next &rarr;
-          </button>
-        </div>
+            </div>
+          </InfiniteScroll>
       </div>
     );
   }

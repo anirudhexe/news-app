@@ -6,8 +6,17 @@ export class NewsItem extends Component {
     let {title, description, imgurl, newsurl, author, date, source}=this.props;
     return (
       <div className="my-3 ">
-        <span class="badge" style={{backgroundColor: "#112435", opacity: "0.7", zIndex:1}}>{source}</span>                                         
+                                                 
         <div className="card">
+          <div style={{
+            display:'flex',
+            justifyContent:'flex-end',
+            position:'absolute',
+            right:'0'
+          }}>
+            <span class="badge" style={{backgroundColor: "#112435"}}>{source}</span>
+          </div>
+        
         <img src={imgurl} className="card-img-top" alt="..."/>
         <div className="card-body">
           <h5 className="card-title">{title}</h5>
